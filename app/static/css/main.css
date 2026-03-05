@@ -1,0 +1,534 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   main.css — MindGuard Design System
+   Dark glassmorphism theme with teal accent, smooth animations
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Google Font already loaded in base.html ─────────────────────────────── */
+:root {
+    --accent: #00d4aa;
+    --accent-dark: #00b892;
+    --accent-glow: rgba(0, 212, 170, 0.25);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.10);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --body-bg: #0d1117;
+    --surface-bg: #161b22;
+    --surface-2: #21262d;
+    --text-primary: #e6edf3;
+    --text-muted: #8b949e;
+    --risk-green: #238636;
+    --risk-amber: #b45309;
+    --risk-red: #da3633;
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --navbar-bg: rgba(13, 17, 23, 0.85);
+    --footer-bg: rgba(13, 17, 23, 0.80);
+}
+
+/* ── Light Mode Overrides ─────────────────────────────────────────────────── */
+[data-mg-theme="light"] {
+    --glass-bg: rgba(255, 255, 255, 0.70);
+    --glass-border: rgba(0, 0, 0, 0.10);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --body-bg: #f0f4f8;
+    --surface-bg: #ffffff;
+    --surface-2: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-muted: #64748b;
+    --navbar-bg: rgba(255, 255, 255, 0.90);
+    --footer-bg: rgba(255, 255, 255, 0.85);
+}
+
+[data-mg-theme="light"] body {
+    background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 212, 170, 0.10), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(88, 101, 242, 0.06), transparent);
+}
+
+/* Theme toggle button */
+#theme-toggle {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+#theme-toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-glow);
+}
+
+/* Smooth theme transition on all elements */
+html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+*,
+*::before,
+*::after {
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: 0.25s;
+    transition-timing-function: ease;
+    box-sizing: border-box;
+}
+
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--body-bg);
+    background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 212, 170, 0.07), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(88, 101, 242, 0.06), transparent);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    min-height: 100vh;
+    margin: 0;
+}
+
+a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--accent-dark);
+}
+
+/* ── Disclaimer Banner ────────────────────────────────────────────────────── */
+.disclaimer-banner {
+    background: linear-gradient(90deg, rgba(218, 54, 51, 0.15), rgba(218, 54, 51, 0.08));
+    border-bottom: 1px solid rgba(218, 54, 51, 0.3);
+    color: #fca5a5;
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+/* ── Navbar ───────────────────────────────────────────────────────────────── */
+.navbar-glass {
+    background: var(--navbar-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 0.75rem 0;
+}
+
+.navbar-glass .navbar-brand {
+    font-size: 1.25rem;
+    color: var(--text-primary) !important;
+    letter-spacing: -0.02em;
+}
+
+.navbar-glass .nav-link {
+    color: var(--text-muted) !important;
+    padding: 0.4rem 0.75rem !important;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.navbar-glass .nav-link:hover,
+.navbar-glass .nav-link.active {
+    color: var(--accent) !important;
+    background: var(--accent-glow);
+}
+
+/* ── Accent colour helpers ─────────────────────────────────────────────────── */
+.text-accent {
+    color: var(--accent) !important;
+}
+
+.bg-accent {
+    background-color: var(--accent) !important;
+}
+
+.btn-accent {
+    background: linear-gradient(135deg, var(--accent), #00b8d9);
+    border: none;
+    color: #0d1117;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.btn-accent:hover {
+    background: linear-gradient(135deg, var(--accent-dark), #00a3bf);
+    color: #0d1117;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px var(--accent-glow);
+}
+
+.btn-accent:active {
+    transform: translateY(0);
+}
+
+/* ── Glassmorphism Card ──────────────────────────────────────────────────── */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow);
+    transition: var(--transition);
+}
+
+.glass-card:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Score Circle ─────────────────────────────────────────────────────────── */
+.score-circle {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    border: 4px solid;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.score-green {
+    border-color: #2ea043;
+    box-shadow: 0 0 25px rgba(46, 160, 67, 0.4);
+}
+
+.score-amber {
+    border-color: #d29922;
+    box-shadow: 0 0 25px rgba(210, 153, 34, 0.4);
+}
+
+.score-red {
+    border-color: #da3633;
+    box-shadow: 0 0 25px rgba(218, 54, 51, 0.4);
+}
+
+.score-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.score-max {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+/* ── Risk Badges ──────────────────────────────────────────────────────────── */
+.risk-badge-green {
+    background: rgba(46, 160, 67, 0.2);
+    color: #4ae36a;
+    border: 1px solid rgba(46, 160, 67, 0.3);
+    border-radius: 20px;
+    padding: 4px 14px;
+}
+
+.risk-badge-amber {
+    background: rgba(210, 153, 34, 0.2);
+    color: #e3a64a;
+    border: 1px solid rgba(210, 153, 34, 0.3);
+    border-radius: 20px;
+    padding: 4px 14px;
+}
+
+.risk-badge-red {
+    background: rgba(218, 54, 51, 0.2);
+    color: #e36a67;
+    border: 1px solid rgba(218, 54, 51, 0.3);
+    border-radius: 20px;
+    padding: 4px 14px;
+}
+
+/* ── Stat icon ─────────────────────────────────────────────────────────────── */
+.stat-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Chat UI ─────────────────────────────────────────────────────────────── */
+.chat-window {
+    height: 480px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    scroll-behavior: smooth;
+}
+
+.chat-window::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-window::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-window::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 3px;
+}
+
+.chat-bubble {
+    display: flex;
+    flex-direction: column;
+    max-width: 78%;
+    animation: bubbleIn 0.3s ease-out;
+}
+
+@keyframes bubbleIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user-bubble {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.ai-bubble {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+.bubble-content {
+    padding: 10px 16px;
+    border-radius: 18px;
+    line-height: 1.5;
+    font-size: 0.93rem;
+}
+
+.user-bubble .bubble-content {
+    background: linear-gradient(135deg, var(--accent), #00b8d9);
+    color: #0d1117;
+    border-bottom-right-radius: 4px;
+}
+
+.ai-bubble .bubble-content {
+    background: var(--surface-2);
+    border: 1px solid var(--glass-border);
+    border-bottom-left-radius: 4px;
+}
+
+.bubble-time {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 3px;
+    padding: 0 4px;
+}
+
+/* Typing dots animation */
+.typing-dots {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    padding: 4px 2px;
+}
+
+.typing-dots span {
+    width: 8px;
+    height: 8px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+
+    30% {
+        transform: translateY(-6px);
+        opacity: 1;
+    }
+}
+
+.chat-input-area textarea {
+    resize: none;
+    border-radius: 12px;
+    font-family: inherit;
+}
+
+.chat-input-area textarea:focus {
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    border-color: var(--accent) !important;
+    outline: none;
+}
+
+/* ── Mood Picker ──────────────────────────────────────────────────────────── */
+.mood-btn {
+    border-radius: 12px !important;
+    transition: var(--transition) !important;
+    padding: 0.6rem 0.4rem !important;
+}
+
+.btn-check:checked+.mood-btn {
+    background: var(--accent-glow) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.mood-btn:hover {
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+}
+
+/* ── Breathing Circle ─────────────────────────────────────────────────────── */
+.breathing-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    transition: all 0.8s ease;
+    cursor: pointer;
+}
+
+/* ── Wellness Hub ─────────────────────────────────────────────────────────── */
+.wellness-icon {
+    transition: var(--transition);
+}
+
+.card:hover .wellness-icon {
+    transform: scale(1.1);
+}
+
+.affirmation-text {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    font-style: italic;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+.footer-glass {
+    background: var(--footer-bg);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--glass-border);
+}
+
+/* ── Form controls — dark styling ─────────────────────────────────────────── */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-glow) !important;
+}
+
+.form-range::-webkit-slider-thumb {
+    background: var(--accent);
+}
+
+.form-range::-moz-range-thumb {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.form-check-input:checked {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* ── Table tweaks ─────────────────────────────────────────────────────────── */
+.table-dark {
+    --bs-table-bg: transparent;
+}
+
+.table-hover tbody tr:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* ── Grounding list ───────────────────────────────────────────────────────── */
+.grounding-list .badge {
+    min-width: 24px;
+    height: 24px;
+    font-size: 0.8rem;
+    line-height: 24px;
+    padding: 0;
+}
+
+/* ── Responsive tweaks ────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .chat-window {
+        height: 360px;
+    }
+
+    .score-circle {
+        width: 90px;
+        height: 90px;
+    }
+
+    .score-value {
+        font-size: 1.6rem;
+    }
+}
+
+/* ── Utility animations ───────────────────────────────────────────────────── */
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

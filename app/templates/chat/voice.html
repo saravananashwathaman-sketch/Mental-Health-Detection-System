@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}MindGuard Wait - AI Voice Companion{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Voice Assistant Avatar CSS */
+    .avatar-container {
+        position: relative;
+        width: 250px;
+        height: 250px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    /* Base Core */
+    .avatar-core {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #38bdf8 20%, #0284c7 80%);
+        box-shadow: 0 0 40px rgba(56, 189, 248, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.5);
+        z-index: 10;
+        transition: all 0.5s ease-in-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+    }
+
+    /* Core Idle Breathe Animation */
+    @keyframes breathe {
+
+        0%,
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 40px rgba(56, 189, 248, 0.6);
+        }
+
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 0 60px rgba(56, 189, 248, 0.8);
+        }
+    }
+
+    .state-idle .avatar-core {
+        animation: breathe 4s infinite ease-in-out;
+    }
+
+    /* Core Processing Pulse Animation */
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 0.8;
+        }
+
+        50% {
+            transform: scale(1.1);
+            opacity: 1;
+            box-shadow: 0 0 80px rgba(56, 189, 248, 1);
+        }
+    }
+
+    .state-processing .avatar-core {
+        animation: pulse 1s infinite ease-in-out;
+    }
+
+    /* SVG Rings */
+    .avatar-rings {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    .ring {
+        fill: none;
+        stroke: rgba(56, 189, 248, 0.3);
+        stroke-width: 2;
+        transform-origin: center;
+        transition: all 0.5s ease;
+    }
+
+    /* Ring animations based on states */
+    @keyframes spin-slow {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes spin-fast {
+        100% {
+            transform: rotate(-360deg);
+        }
+    }
+
+    .state-idle .ring-inner {
+        animation: spin-slow 20s linear infinite;
+    }
+
+    .state-idle .ring-outer {
+        animation: spin-fast 30s linear infinite;
+    }
+
+    .state-listening .ring-inner {
+        stroke: rgba(56, 189, 248, 0.8);
+        stroke-width: 4;
+        animation: spin-slow 8s linear infinite;
+    }
+
+    .state-processing .ring-inner {
+        stroke: rgba(244, 114, 182, 0.8);
+        stroke-width: 3;
+        animation: spin-fast 3s linear infinite;
+    }
+
+    /* Emotion Color Themes */
+    /* Healthy / Calm (Blue/Green) */
+    .emotion-healthy .avatar-core {
+        background: radial-gradient(circle, #34d399 20%, #059669 80%);
+        box-shadow: 0 0 40px rgba(52, 211, 153, 0.6);
+    }
+
+    .emotion-healthy .ring {
+        stroke: rgba(52, 211, 153, 0.4);
+    }
+
+    /* Moderate Risk (Amber) */
+    .emotion-moderate .avatar-core {
+        background: radial-gradient(circle, #fbbf24 20%, #d97706 80%);
+        box-shadow: 0 0 40px rgba(251, 191, 36, 0.6);
+    }
+
+    .emotion-moderate .ring {
+        stroke: rgba(251, 191, 36, 0.4);
+    }
+
+    /* High Risk (Rose) */
+    .emotion-high .avatar-core {
+        background: radial-gradient(circle, #fb7185 20%, #e11d48 80%);
+        box-shadow: 0 0 40px rgba(251, 113, 133, 0.6);
+    }
+
+    .emotion-high .ring {
+        stroke: rgba(251, 113, 133, 0.4);
+    }
+
+    /* Audio Canvas Overlay */
+    #audio-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 15;
+        border-radius: 50%;
+        /* Mix blend mode helps the canvas audio lines pop over the glowing core */
+        mix-blend-mode: screen;
+    }
+
+    /* Transcript area smooth scrolling */
+    #transcript-container {
+        scroll-behavior: smooth;
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+    }
+
+    #transcript-container::-webkit-scrollbar {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto min-h-[80vh] flex flex-col items-center justify-center p-4">
+
+    <!-- Top Bar Controls -->
+    <div class="w-full flex justify-between items-center mb-8">
+        <a href="{{ url_for('dashboard.index') }}"
+            class="text-slate-500 hover:text-slate-800 transition flex items-center gap-2">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+        <div class="flex items-center gap-2 text-sm">
+            <span class="w-2.5 h-2.5 rounded-full bg-slate-400" id="status-dot"></span>
+            <span class="font-medium text-slate-500 uppercase tracking-widest text-[10px]"
+                id="status-text">OFFLINE</span>
+        </div>
+    </div>
+
+    <!-- The Voice Panel Card -->
+    <div
+        class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 w-full max-w-2xl shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
+
+        <!-- Animated Avatar -->
+        <div id="ai-avatar" class="avatar-container state-idle emotion-healthy my-8">
+            <svg class="avatar-rings" viewBox="0 0 200 200">
+                <circle class="ring ring-inner" cx="100" cy="100" r="80" stroke-dasharray="20 10 40 10" />
+                <circle class="ring ring-outer" cx="100" cy="100" r="95" stroke-dasharray="10 30 50 20" />
+            </svg>
+            <div class="avatar-core">
+                <i class="bi bi-soundwave"></i>
+            </div>
+            <!-- Canvas for Web Audio API drawing -->
+            <canvas id="audio-canvas" width="250" height="250"></canvas>
+        </div>
+
+        <!-- Feedback & Transcription -->
+        <div class="w-full mt-4 mb-8">
+            <h3 class="text-white/50 text-xs font-mono uppercase tracking-widest mb-4">Live Transcript</h3>
+            <div id="transcript-container" class="h-28 overflow-y-auto space-y-3 px-4 w-full">
+                <p class="text-white text-lg font-light leading-relaxed opacity-60 italic" id="placeholder-text">Click
+                    the microphone to start speaking...</p>
+                <!-- Transcripts injected here -->
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center gap-4 mt-auto">
+            <button id="mic-toggle-btn"
+                class="w-16 h-16 rounded-full bg-white text-slate-900 flex items-center justify-center text-2xl shadow-lg hover:scale-105 active:scale-95 transition-transform relative group">
+                <i class="bi bi-mic-fill" id="mic-icon"></i>
+                <div
+                    class="absolute inset-0 rounded-full border-4 border-white opacity-0 group-hover:animate-ping z-[-1]">
+                </div>
+            </button>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/voice_assistant.js') }}"></script>
+{% endblock %}

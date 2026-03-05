@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Analysis Results{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-12 px-4">
+    <div class="text-center mb-12 animate-fade-in">
+        <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white mb-4">Your <span
+                class="bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(0,242,255,0.4)]">Mood
+                & Mental
+                Health</span> Analysis</h1>
+        <p class="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">Based on your recent assessment, here is a
+            snapshot of your current
+            emotional landscape.</p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <!-- Mood Gauge -->
+        <div
+            class="bg-white dark:bg-slate-900 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-800 shadow-lg shadow-slate-100/50 dark:shadow-none animate-slide-up hover:border-neon-blue transition-all duration-500">
+            <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6">Current Mood
+            </h3>
+            <div class="relative w-32 h-32 mx-auto mb-6">
+                <svg class="w-full h-full transform -rotate-90">
+                    <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent"
+                        class="text-slate-50 dark:text-slate-800" />
+                    <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="10" fill="transparent"
+                        stroke-dasharray="364.4" stroke-dashoffset="{{ 364.4 * (1 - (percentage/100)) }}"
+                        class="{% if percentage >= 80 %}text-neon-green{% elif percentage >= 40 %}text-neon-blue{% else %}text-neon-pink{% endif %} transition-all duration-1000 drop-shadow-[0_0_8px_currentColor]" />
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center flex-col">
+                    <span class="text-3xl font-black text-slate-900 dark:text-white">{{ percentage|round|int }}%</span>
+                </div>
+            </div>
+            <div class="text-center">
+                <p class="font-bold text-slate-800 dark:text-slate-200 text-lg leading-tight">{{
+                    assessment.mood_prediction }}</p>
+            </div>
+        </div>
+
+        <!-- Insights -->
+        <div
+            class="md:col-span-2 bg-white dark:bg-slate-900 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-800 shadow-lg dark:shadow-none animate-slide-up delay-100 hover:border-neon-purple transition-all duration-500">
+            <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6">Key Insights
+            </h3>
+            <p class="text-lg text-slate-700 dark:text-slate-300 leading-relaxed mb-6">{{ assessment.insights }}</p>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div
+                    class="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
+                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Stress Level</p>
+                    <p class="font-bold text-slate-800 dark:text-slate-200">
+                        {% if percentage >= 80 %}<span class="text-neon-green">Low</span>{% elif percentage >= 60
+                        %}<span class="text-neon-blue">Moderate</span>{% else %}<span
+                            class="text-neon-pink">High</span>{% endif %}
+                    </p>
+                </div>
+                <div
+                    class="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
+                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Emotional Score</p>
+                    <p class="font-bold text-slate-800 dark:text-slate-200 text-lg">{{ assessment.total_score }} <span
+                            class="text-sm font-normal text-slate-500">/ {{ assessment.max_score }}</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div
+        class="bg-slate-900 dark:bg-black rounded-[2.5rem] p-10 text-white shadow-2xl dark:shadow-none border border-slate-800 dark:border-slate-700 animate-slide-up delay-200 hover:border-neon-green transition-all duration-500">
+        <div class="flex flex-col md:flex-row items-center gap-10">
+            <div
+                class="w-20 h-20 rounded-3xl bg-gradient-to-br from-neon-green to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(57,255,20,0.3)]">
+                <i class="bi bi-lightbulb-fill text-3xl"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-black mb-3 text-neon-green drop-shadow-[0_0_8px_rgba(57,255,20,0.4)]">
+                    Personalized Recommendations</h2>
+                <ul class="space-y-3 text-slate-300">
+                    {% if percentage >= 80 %}
+                    <li class="flex items-start gap-3"><i class="bi bi-check-circle-fill text-calm-400 mt-1"></i>
+                        Continue your current self-care routines.</li>
+                    <li class="flex items-start gap-3"><i class="bi bi-check-circle-fill text-calm-400 mt-1"></i>
+                        Consider sharing your strategies with a friend in need.</li>
+                    {% elif percentage >= 40 %}
+                    <li class="flex items-start gap-3"><i class="bi bi-check-circle-fill text-calm-400 mt-1"></i>
+                        Schedule time for a digital detox or nature walk.</li>
+                    <li class="flex items-start gap-3"><i class="bi bi-check-circle-fill text-calm-400 mt-1"></i> Try
+                        journaling your thoughts for 10 minutes each day.</li>
+                    <li class="flex items-start gap-3"><i class="bi bi-check-circle-fill text-calm-400 mt-1"></i> Reach
+                        out to a loved one for a supportive chat.</li>
+                    {% else %}
+                    <li class="flex items-start gap-3"><i
+                            class="bi bi-exclamation-triangle-fill text-amber-400 mt-1"></i> We recommend speaking with
+                        a trusted person or a professional counselor.</li>
+                    <li class="flex items-start gap-3"><i class="bi bi-check-circle-fill text-calm-400 mt-1"></i> Focus
+                        on immediate small wins like quality sleep and hydration.</li>
+                    <li class="flex items-start gap-3"><i class="bi bi-check-circle-fill text-calm-400 mt-1"></i> Check
+                        our Helpline section (bottom right) for immediate support.</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ethical Safeguard -->
+    {% if percentage < 40 %} <div
+        class="mt-8 p-6 bg-rose-50 border border-rose-100 rounded-3xl text-rose-700 flex items-center gap-4 animate-pulse">
+        <i class="bi bi-shield-fill-exclamation text-3xl"></i>
+        <p class="font-medium text-sm">
+            This assessment suggests you may be experiencing significant emotional stress.
+            Consider speaking with a trusted person, counselor, or mental health professional.
+        </p>
+</div>
+{% endif %}
+
+<div class="mt-12 text-center">
+    <a href="{{ url_for('media.index') }}"
+        class="neon-btn inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 text-white font-bold hover:from-neon-blue hover:to-neon-purple transition-all">
+        Explore Helpful Media <i class="bi bi-arrow-right"></i>
+    </a>
+</div>
+</div>
+{% endblock %}

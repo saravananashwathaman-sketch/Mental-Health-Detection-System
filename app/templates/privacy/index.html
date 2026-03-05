@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Privacy & Data{% endblock %}
+
+{% block content %}
+<h2 class="h3 fw-bold mb-1">
+    <i class="bi bi-shield-lock text-accent me-2"></i>Privacy & Data Control
+</h2>
+<p class="text-muted mb-4">You are always in control of your data.</p>
+
+<div class="row g-4">
+
+    <!-- ── Data Overview ──────────────────────────────────────────────── -->
+    <div class="col-md-4">
+        <div class="card glass-card h-100">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-database me-2 text-accent"></i>Your Data</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item bg-transparent d-flex justify-content-between">
+                        <span><i class="bi bi-envelope me-2"></i>Account</span>
+                        <span class="badge bg-primary">{{ user.email }}</span>
+                    </li>
+                    <li class="list-group-item bg-transparent d-flex justify-content-between">
+                        <span><i class="bi bi-calendar3 me-2"></i>Joined</span>
+                        <span class="text-muted small">{{ user.created_at.strftime('%b %d, %Y') }}</span>
+                    </li>
+                    <li class="list-group-item bg-transparent d-flex justify-content-between">
+                        <span><i class="bi bi-sun me-2"></i>Mood check-ins</span>
+                        <span class="badge bg-success">{{ mood_count }}</span>
+                    </li>
+                    <li class="list-group-item bg-transparent d-flex justify-content-between">
+                        <span><i class="bi bi-chat-dots me-2"></i>Chat messages</span>
+                        <span class="badge bg-info">{{ chat_count }}</span>
+                    </li>
+                    <li class="list-group-item bg-transparent d-flex justify-content-between">
+                        <span><i class="bi bi-graph-up me-2"></i>Wellbeing scores</span>
+                        <span class="badge bg-warning text-dark">{{ score_count }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Privacy Policy ─────────────────────────────────────────────── -->
+    <div class="col-md-8">
+        <div class="card glass-card mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-file-text me-2 text-accent"></i>Privacy Policy Summary
+                </h5>
+                <div class="row g-3">
+                    {% for icon, title, text in [
+                    ('lock-fill', 'Data is stored locally', 'All your data lives only on this server. Nothing is sent to
+                    third parties.'),
+                    ('eye-slash-fill', 'No profiling', 'We do not build advertising profiles or share data with
+                    analytics platforms.'),
+                    ('person-fill-x', 'Right to erasure', 'You can delete all your data instantly at any time using the
+                    button below.'),
+                    ('download', 'Data portability', 'Download a complete JSON copy of all your data at any time.'),
+                    ('shield-check-fill', 'Consent-based', 'Your data is only collected because you explicitly consented
+                    at registration.'),
+                    ('exclamation-triangle-fill', 'Not medical data', 'This is wellness tracking data, not clinical
+                    medical records.')
+                    ] %}
+                    <div class="col-md-6">
+                        <div class="d-flex gap-3 align-items-start">
+                            <i class="bi bi-{{ icon }} text-accent fs-5 flex-shrink-0 mt-1"></i>
+                            <div>
+                                <strong class="small d-block">{{ title }}</strong>
+                                <small class="text-muted">{{ text }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Data Actions ────────────────────────────────────────────── -->
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card border-success bg-success bg-opacity-10 h-100">
+                    <div class="card-body p-4 text-center">
+                        <i class="bi bi-download fs-2 text-success mb-2 d-block"></i>
+                        <h6 class="fw-bold">Export My Data</h6>
+                        <p class="text-muted small mb-3">
+                            Download a full JSON copy of all data we store about you.
+                        </p>
+                        <a href="{{ url_for('privacy.export_data') }}" class="btn btn-success btn-sm fw-semibold">
+                            <i class="bi bi-file-earmark-arrow-down me-1"></i>Download JSON
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-danger bg-danger bg-opacity-10 h-100">
+                    <div class="card-body p-4 text-center">
+                        <i class="bi bi-trash3-fill fs-2 text-danger mb-2 d-block"></i>
+                        <h6 class="fw-bold">Delete All My Data</h6>
+                        <p class="text-muted small mb-3">
+                            Permanently erase your account and all stored data.
+                            <strong>This cannot be undone.</strong>
+                        </p>
+                        <button class="btn btn-danger btn-sm fw-semibold" data-bs-toggle="modal"
+                            data-bs-target="#deleteModal">
+                            <i class="bi bi-exclamation-triangle me-1"></i>Delete Everything
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Delete Confirmation Modal ──────────────────────────────────────────── -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-danger">
+            <div class="modal-header border-danger">
+                <h5 class="modal-title text-danger fw-bold">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you absolutely sure? This will permanently delete:</p>
+                <ul>
+                    <li>Your account ({{ user.email }})</li>
+                    <li>All {{ mood_count }} mood check-ins</li>
+                    <li>All {{ chat_count }} chat messages</li>
+                    <li>All {{ score_count }} wellbeing scores</li>
+                </ul>
+                <p class="text-danger fw-bold mb-0">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer border-danger">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('privacy.delete_data') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger fw-semibold">
+                        <i class="bi bi-trash3 me-1"></i>Yes, Delete Everything
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

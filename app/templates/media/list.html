@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - Media{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 text-xs text-slate-400 mb-6">
+        <a href="{{ url_for('media.index') }}" class="hover:text-calm-600">Media Dashboard</a>
+        <i class="bi bi-chevron-right text-[10px]"></i>
+        <span class="text-slate-600 font-medium">{{ type }}: {{ title }}</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="mb-12">
+        <h1 class="text-3xl font-bold text-slate-900 mb-2">{{ title }}</h1>
+        <p class="text-slate-500">Discovering all {{ title | lower }} content filtered for your wellbeing.</p>
+    </div>
+
+    <!-- Content Grid -->
+    {% if items %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for item in items %}
+        <div
+            class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm hover:shadow-xl transition-all group flex flex-col">
+            <div class="relative rounded-2xl overflow-hidden aspect-video mb-5 shadow-sm">
+                {% if item.thumbnail_url %}
+                <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                {% else %}
+                <div class="w-full h-full bg-slate-50 flex items-center justify-center">
+                    <i class="bi bi-play-circle text-slate-200 text-5xl"></i>
+                </div>
+                {% endif %}
+
+                <div class="absolute top-4 left-4">
+                    <span
+                        class="px-2 py-1 rounded-lg bg-black/40 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-widest">
+                        {{ item.type }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex-1">
+                <div class="flex items-center justify-between mb-2">
+                    <span
+                        class="text-[10px] font-black text-calm-600 bg-calm-50 px-2 py-0.5 rounded-md uppercase tracking-wide">{{
+                        item.personality_category }}</span>
+                    <span class="text-[10px] font-bold text-slate-400">{{ item.language }}</span>
+                </div>
+                <h4 class="text-lg font-bold text-slate-800 mb-2 group-hover:text-calm-600 transition-colors">{{
+                    item.title }}</h4>
+                <p class="text-sm text-slate-500 leading-relaxed line-clamp-3 mb-6">{{ item.description }}</p>
+            </div>
+
+            <div class="flex items-center justify-between pt-4 border-t border-slate-50 mt-auto">
+                <div class="flex gap-1.5 overflow-hidden">
+                    {% for tag in item.tags.split(',') %}
+                    <span
+                        class="text-[9px] px-2 py-1 rounded-lg bg-slate-50 text-slate-400 border border-slate-100 whitespace-nowrap">#{{
+                        tag.strip() }}</span>
+                    {% endfor %}
+                </div>
+                <a href="{{ item.source_url }}" target="_blank"
+                    class="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center hover:bg-calm-600 transition-all shadow-lg shadow-slate-200 hover:shadow-calm-100">
+                    <i class="bi bi-arrow-up-right"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-24 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
+        <div
+            class="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-slate-100">
+            <i class="bi bi-inbox text-slate-200 text-4xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-slate-800 mb-2">No content found in this category</h3>
+        <p class="text-slate-500 mb-8 max-w-sm mx-auto">Our AI is still curating high-quality Tamil and English content
+            for this personality type.</p>
+        <a href="{{ url_for('media.index') }}"
+            class="inline-flex items-center gap-2 text-calm-600 font-bold hover:text-calm-700">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

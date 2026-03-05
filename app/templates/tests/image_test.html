@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Image Emotion Test{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-10 px-4">
+    <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 animate-slide-up">
+
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <div
+                class="inline-flex items-center gap-2 bg-lav-50 border border-lav-200 text-lav-700 rounded-full px-4 py-1.5 text-xs font-semibold mb-4">
+                Question {{ current_q }} of {{ total_q }}
+            </div>
+            <h1 class="text-3xl font-bold text-slate-800 mb-4">Which image reflects your mood?</h1>
+            <p class="text-slate-500 max-w-lg mx-auto">
+                Select the image that most resonates with your current state of mind.
+            </p>
+        </div>
+
+        <form method="POST" class="space-y-8">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {% for img in images %}
+                <label
+                    class="group block cursor-pointer relative overflow-hidden rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 has-[:checked]:ring-4 has-[:checked]:ring-indigo-500 has-[:checked]:shadow-2xl has-[:checked]:shadow-indigo-500/40 has-[:checked]:scale-[1.03] has-[:checked]:z-10 bg-white">
+                    <input type="radio" name="image_id" value="{{ img.id }}" class="hidden" required>
+                    <div class="aspect-video relative overflow-hidden bg-slate-100">
+                        <img src="{{ img.url }}" alt="Emotional choice"
+                            class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-has-[:checked]:scale-110 group-has-[:checked]:brightness-105">
+                        <div
+                            class="absolute inset-0 border-[6px] border-transparent group-has-[:checked]:border-indigo-500 group-has-[:checked]:bg-indigo-500/10 transition-all z-10">
+                        </div>
+                        <div
+                            class="absolute inset-0 flex items-center justify-center opacity-0 group-has-[:checked]:opacity-100 transition-all transform scale-50 group-has-[:checked]:scale-100 z-20">
+                            <div
+                                class="bg-indigo-600 text-white rounded-full w-14 h-14 shadow-2xl border-[3px] border-white flex items-center justify-center">
+                                <i class="bi bi-check-lg text-3xl font-black"></i>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+
+            <div class="pt-8 border-t border-slate-100 flex justify-center">
+                <button type="submit"
+                    class="px-12 py-4 rounded-2xl font-bold text-white bg-gradient-to-r from-lav-500 to-lav-600 shadow-xl shadow-lav-200/50 hover:shadow-lav-300/50 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    {% if current_q == total_q %}
+                    Generate Final Report <i class="bi bi-file-earmark-pdf-fill ms-2"></i>
+                    {% else %}
+                    Next Question <i class="bi bi-arrow-right ms-2"></i>
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

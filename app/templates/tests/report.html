@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Mental Health Report{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-10 px-4">
+    <div class="animate-slide-up">
+
+        <!-- Header & Action -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800">Your Mental Health Report</h1>
+                <p class="text-slate-500">Generated on {{ report.timestamp.strftime('%B %d, %Y at %H:%M') }}</p>
+            </div>
+            <a href="{{ url_for('personalized.download_report', report_id=report.id) }}"
+                class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-800 text-white rounded-xl font-semibold hover:bg-slate-900 transition-all shadow-lg hover:shadow-slate-200">
+                <i class="bi bi-file-earmark-pdf"></i>
+                Download PDF Report
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left: Score Cards -->
+            <div class="lg:col-span-1 space-y-6">
+
+                <!-- Combined Result Highlight text bar -->
+                <div
+                    class="bg-white rounded-3xl p-6 border-l-8 {% if report.risk_level == 'RED' %}border-red-500 bg-red-50{% elif report.risk_level == 'AMBER' %}border-amber-500 bg-amber-50{% else %}border-calm-500 bg-calm-50{% endif %} shadow-lg">
+                    <h3 class="text-slate-500 font-bold mb-1 uppercase tracking-wider text-xs">Overall Assessment Result
+                    </h3>
+                    <div class="flex items-end gap-2 mt-2">
+                        <span
+                            class="text-5xl font-extrabold {% if report.risk_level == 'RED' %}text-red-700{% elif report.risk_level == 'AMBER' %}text-amber-700{% else %}text-calm-700{% endif %}">{{
+                            report.overall_score|int }}</span>
+                        <span
+                            class="text-lg opacity-60 font-medium mb-1 {% if report.risk_level == 'RED' %}text-red-700{% elif report.risk_level == 'AMBER' %}text-amber-700{% else %}text-calm-700{% endif %}">/
+                            100</span>
+                    </div>
+                    <div
+                        class="inline-block mt-4 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm {% if report.risk_level == 'RED' %}bg-white text-red-600{% elif report.risk_level == 'AMBER' %}bg-white text-amber-600{% else %}bg-white text-calm-600{% endif %} border border-white/40 uppercase tracking-widest">
+                        {{ report.category }}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Color Analysis Graph -->
+                    <div
+                        class="bg-white rounded-3xl p-5 border border-slate-100 shadow-md text-center flex flex-col justify-center">
+                        <h4 class="text-slate-500 font-semibold mb-4 uppercase tracking-wider text-[10.5px]">Color
+                            Analysis</h4>
+                        <div class="relative w-24 h-24 mx-auto mb-2">
+                            <svg class="w-full h-full" viewBox="0 0 36 36">
+                                <path class="text-slate-100" stroke-width="4" stroke="currentColor" fill="none"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="text-indigo-500" stroke-width="4"
+                                    stroke-dasharray="{{ (report.color_score / 5) * 100 }}, 100" stroke-linecap="round"
+                                    stroke="currentColor" fill="none"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-3xl font-bold text-slate-800">{{ report.color_score }}</span>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase">/ 5</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Analysis Graph -->
+                    <div
+                        class="bg-white rounded-3xl p-5 border border-slate-100 shadow-md text-center flex flex-col justify-center">
+                        <h4 class="text-slate-500 font-semibold mb-4 uppercase tracking-wider text-[10.5px]">Image
+                            Analysis</h4>
+                        <div class="relative w-24 h-24 mx-auto mb-2">
+                            <svg class="w-full h-full" viewBox="0 0 36 36">
+                                <path class="text-slate-100" stroke-width="4" stroke="currentColor" fill="none"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="text-rose-500" stroke-width="4"
+                                    stroke-dasharray="{{ ((report.image_score / report.image_max) * 100)|round(1) if report.image_max > 0 else 50 }}, 100"
+                                    stroke-linecap="round" stroke="currentColor" fill="none"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-3xl font-bold text-slate-800">{{ report.image_score }}</span>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase">/ {{ report.image_max
+                                    }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-calm-500 to-sage-500 rounded-3xl p-6 text-white shadow-lg">
+                    <h4 class="font-bold mb-2 flex items-center gap-2">
+                        <i class="bi bi-lightbulb"></i>
+                        Next Steps
+                    </h4>
+                    <p class="text-sm opacity-90 leading-relaxed">{{ report.recommendations }}</p>
+                </div>
+            </div>
+
+            <!-- Right: Details & Breakdown -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Data Table -->
+                <div class="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden">
+                    <div class="p-6 border-b border-slate-50">
+                        <h3 class="font-bold text-slate-800">Assessment Breakdown</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-slate-500 text-xs font-bold uppercase">
+                                <tr>
+                                    <th class="px-6 py-4">Indicator</th>
+                                    <th class="px-6 py-4">Raw Score</th>
+                                    <th class="px-6 py-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                <tr>
+                                    <td class="px-6 py-4">
+                                        <div class="font-semibold text-slate-700">PHQ-9 (Depression)</div>
+                                        <div class="text-[10px] text-slate-400 italic">Self-reported assessment</div>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-600 font-mono">{{ report.phq9_score }} / 27</td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-xs px-2 py-1 rounded bg-slate-100 text-slate-500">
+                                            {% if report.phq9_score < 5 %}Minimal{% elif report.phq9_score < 10 %}Mild{%
+                                                elif report.phq9_score < 15 %}Moderate{% else %}Severe{% endif %}
+                                                </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4">
+                                        <div class="font-semibold text-slate-700">GAD-7 (Anxiety)</div>
+                                        <div class="text-[10px] text-slate-400 italic">Self-reported assessment</div>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-600 font-mono">{{ report.gad7_score }} / 21</td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-xs px-2 py-1 rounded bg-slate-100 text-slate-500">
+                                            {% if report.gad7_score < 5 %}Minimal{% elif report.gad7_score < 10 %}Mild{%
+                                                elif report.gad7_score < 15 %}Moderate{% else %}Severe{% endif %}
+                                                </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4">
+                                        <div class="font-semibold text-slate-700">Chat Sentiment</div>
+                                        <div class="text-[10px] text-slate-400 italic">Last 10 messages (NLP Analysis)
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-600 font-mono">{{
+                                        "%.2f"|format(report.sentiment_score) }}</td>
+                                    <td class="px-6 py-4">
+                                        <span
+                                            class="text-xs px-2 py-1 rounded {% if report.sentiment_score > 0 %}bg-green-50 text-green-600{% else %}bg-orange-50 text-orange-600{% endif %}">
+                                            {{ "Positive" if report.sentiment_score > 0 else "Distressed" }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4">
+                                        <div class="font-semibold text-slate-700">Color Mood Selection</div>
+                                        <div class="text-[10px] text-slate-400 italic">Immediate emotional response
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-600 font-mono">{{ report.color_name }} ({{
+                                        report.color_score }}/5)</td>
+                                    <td class="px-6 py-4">
+                                        <div class="w-6 h-6 rounded-full border border-slate-200 shadow-sm"
+                                            style="background-color: {{ report.color_hex }}"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4">
+                                        <div class="font-semibold text-slate-700">Image Resonance</div>
+                                        <div class="text-[10px] text-slate-400 italic">Intuitive choice assessment</div>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-600 font-mono">{{ report.image_score }} / {{
+                                        report.image_max }}</td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-xs px-2 py-1 rounded bg-slate-100">Evaluated</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-3xl p-6">
+                    <h4 class="font-bold text-amber-800 mb-2 flex items-center gap-2">
+                        <i class="bi bi-info-circle"></i>
+                        Clinical Concern
+                    </h4>
+                    <p class="text-amber-700 text-sm leading-relaxed">{{ report.concerns }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

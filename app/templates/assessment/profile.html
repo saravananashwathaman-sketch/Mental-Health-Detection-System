@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Assessment Profile{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-12 px-4">
+    <div class="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 animate-fade-in">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-slate-900 mb-3">Personalize Your <span
+                    class="text-calm-600">Assessment</span></h1>
+            <p class="text-slate-500">We'll use these basic details to select the most relevant questions for your life
+                stage.</p>
+        </div>
+
+        <form method="POST" class="space-y-8">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <!-- Age Group -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-4 uppercase tracking-wider">What is your
+                    age?</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {% for age in ["Under 13", "13–17", "18–22", "23–35", "36–60", "Above 60"] %}
+                    <label class="relative block cursor-pointer group">
+                        <input type="radio" name="age_group" value="{{ age }}" required class="peer sr-only">
+                        <div
+                            class="px-4 py-3 text-center rounded-2xl border-2 border-slate-50 bg-slate-50 text-slate-600 font-semibold transition-all
+                                   peer-checked:border-calm-500 peer-checked:bg-calm-50 peer-checked:text-calm-700 group-hover:bg-slate-100">
+                            {{ age }}
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Life Stage -->
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-4 uppercase tracking-wider">What best describes
+                    you currently?</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {% for stage in ["School Student", "College Student", "Working Professional", "Homemaker",
+                    "Self-employed / Business", "Currently not working"] %}
+                    <label class="relative block cursor-pointer group">
+                        <input type="radio" name="life_stage" value="{{ stage }}" required class="peer sr-only">
+                        <div
+                            class="px-5 py-3 rounded-2xl border-2 border-slate-50 bg-slate-50 text-slate-600 font-semibold transition-all
+                                   peer-checked:border-calm-500 peer-checked:bg-calm-50 peer-checked:text-calm-700 group-hover:bg-slate-100">
+                            {{ stage }}
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Optional Industry -->
+            <div id="industry-container" class="hidden animate-slide-down">
+                <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider">Industry / Job Type
+                    (Optional)</label>
+                <input type="text" name="industry" placeholder="e.g. Healthcare, Education, IT..."
+                    class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-2 border-slate-50 focus:border-calm-500 focus:bg-white focus:outline-none transition-all text-slate-700 font-medium">
+            </div>
+
+            <button type="submit"
+                class="w-full py-5 bg-slate-900 text-white font-bold rounded-2xl shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all transform hover:-translate-y-1">
+                Start My Assessment <i class="bi bi-chevron-right ms-2"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const lifeStageRadios = document.querySelectorAll('input[name="life_stage"]');
+    const industryContainer = document.getElementById('industry-container');
+
+    lifeStageRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radio.value === 'Working Professional' || radio.value === 'Self-employed / Business') {
+                industryContainer.classList.remove('hidden');
+            } else {
+                industryContainer.classList.add('hidden');
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MindGuard — AI Mental Health Early Detection System">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}MindGuard{% endblock %} | MindGuard</title>
+
+    <!-- Apply saved theme before paint -->
+    <script>
+        (function () {
+            var t = localStorage.getItem('mg-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', t);
+            if (t === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'neon-blue': '#00f2ff',
+                        'neon-purple': '#bc13fe',
+                        'neon-pink': '#ff00ff',
+                        'neon-green': '#39ff14',
+                        'calm': { 50: '#EFF6FF', 100: '#DBEAFE', 200: '#BFDBFE', 300: '#93C5FD', 400: '#60A5FA', 500: '#4A90E2', 600: '#2563EB', 700: '#1D4ED8' },
+                        'lav': { 50: '#F5F3FF', 100: '#EDE9FE', 200: '#DDD6FE', 300: '#C4B5FD', 400: '#A78BFA', 500: '#8B6FC2', 600: '#7C3AED' },
+                        'sage': { 50: '#F0FDF4', 100: '#DCFCE7', 200: '#BBF7D0', 300: '#86EFAC', 400: '#4ADE80', 500: '#22C55E', 600: '#16A34A' },
+                        'blush': { 50: '#FFF1F2', 100: '#FFE4E6', 200: '#FECDD3', 300: '#FDA4AF', 400: '#FB7185', 500: '#F43F5E' },
+                        'surface': { DEFAULT: '#FFFFFF', 2: '#F8FAFC', 3: '#F1F5F9', 'dark': '#020617' },
+                    },
+                    boxShadow: {
+                        'neon-blue': '0 0 5px #00f2ff, 0 0 20px #00f2ff',
+                        'neon-purple': '0 0 5px #bc13fe, 0 0 20px #bc13fe',
+                        'neon-pink': '0 0 5px #ff00ff, 0 0 20px #ff00ff',
+                        'neon-green': '0 0 5px #39ff14, 0 0 20px #39ff14',
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    animation: { 'fade-in': 'fadeIn 0.5s ease-out', 'slide-up': 'slideUp 0.4s ease-out' },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(12px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(24px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Bootstrap Icons (for icon set) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --accent: #4A90E2;
+        }
+
+        /* scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F1F5F9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 3px;
+        }
+
+        /* Smooth transition for theme switch */
+        *,
+        *::before,
+        *::after {
+            transition-property: background-color, border-color, color;
+            transition-duration: 0.2s;
+            transition-timing-function: ease;
+        }
+
+        /* glass card */
+        .glass {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* chat bubble animation */
+        @keyframes bubbleIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .bubble-in {
+            animation: bubbleIn 0.3s ease-out;
+        }
+
+        /* typing dot bounce */
+        @keyframes bounce {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .typing-dot {
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: .2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: .4s;
+        }
+
+        /* card hover lift */
+        .card-lift {
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+
+        /* Neon Utilities */
+        .neon-border-blue {
+            border-color: #00f2ff;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        }
+
+        .neon-border-purple {
+            border-color: #bc13fe;
+            box-shadow: 0 0 10px rgba(188, 19, 254, 0.3);
+        }
+
+        .neon-text-blue {
+            color: #00f2ff;
+            text-shadow: 0 0 5px #00f2ff;
+        }
+
+        .neon-text-purple {
+            color: #bc13fe;
+            text-shadow: 0 0 5px #bc13fe;
+        }
+
+        .neon-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .neon-btn:hover {
+            box-shadow: 0 0 20px var(--neon-color, #00f2ff);
+            transform: translateY(-2px);
+        }
+
+        /* Cursor Glow */
+        #cursor-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 242, 255, 0.15) 0%, rgba(188, 19, 254, 0.05) 40%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            filter: blur(40px);
+            transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+        }
+
+        /* Navbar Neon Hover */
+        .nav-link-neon {
+            position: relative;
+        }
+
+        .nav-link-neon::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #00f2ff;
+            box-shadow: 0 0 10px #00f2ff;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link-neon:hover::after {
+            width: 100%;
+        }
+
+        .card-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
+        }
+
+        /* ── Dark Mode — comprehensive surface overrides ── */
+        .dark body {
+            background-color: #020617 !important;
+            color: #f8fafc !important;
+        }
+
+        /* Cards & white surfaces */
+        .dark .bg-white {
+            background-color: #1E293B !important;
+        }
+
+        .dark .bg-slate-50 {
+            background-color: #1E293B !important;
+        }
+
+        .dark .bg-surface-2 {
+            background-color: #0F172A !important;
+        }
+
+        .dark .bg-surface-3 {
+            background-color: #1E293B !important;
+        }
+
+        /* Borders */
+        .dark .border-slate-100 {
+            border-color: #334155 !important;
+        }
+
+        .dark .border-slate-200 {
+            border-color: #334155 !important;
+        }
+
+        /* Text - high contrast for dark mode */
+        .dark .text-slate-800 {
+            color: #FFFFFF !important;
+        }
+
+        .dark .text-slate-700 {
+            color: #F1F5F9 !important;
+        }
+
+        .dark .text-slate-600 {
+            color: #E2E8F0 !important;
+        }
+
+        .dark .text-slate-500 {
+            color: #CBD5E1 !important;
+        }
+
+        .dark .text-slate-400 {
+            color: #94A3B8 !important;
+        }
+
+        /* Navbar */
+        .dark nav {
+            background-color: rgba(15, 23, 42, 0.95) !important;
+            border-color: #334155 !important;
+        }
+
+        .dark #mob-menu {
+            background-color: #1E293B !important;
+            border-color: #334155 !important;
+        }
+
+        /* Footer */
+        .dark footer {
+            background-color: #1E293B !important;
+            border-color: #334155 !important;
+        }
+
+        /* Disclaimer banner */
+        .dark .bg-rose-50 {
+            background-color: #2D1B1B !important;
+        }
+
+        .dark .border-rose-200 {
+            border-color: #7F1D1D !important;
+        }
+
+        .dark .text-rose-600 {
+            color: #FCA5A5 !important;
+        }
+
+        /* Amber / warning alerts */
+        .dark .bg-amber-50 {
+            background-color: #292114 !important;
+        }
+
+        .dark .border-amber-200 {
+            border-color: #78350F !important;
+        }
+
+        .dark .text-amber-700 {
+            color: #FCD34D !important;
+        }
+
+        .dark .text-amber-600 {
+            color: #FDE68A !important;
+        }
+
+        /* Hover effects on nav links */
+        .dark .hover\:bg-calm-50:hover {
+            background-color: #1e3a5f !important;
+        }
+
+        .dark .hover\:bg-slate-50:hover {
+            background-color: #1E293B !important;
+        }
+
+        /* Form inputs */
+        .dark input[type="text"],
+        .dark input[type="email"],
+        .dark input[type="password"],
+        .dark textarea,
+        .dark select {
+            background-color: #0F172A !important;
+            color: #E2E8F0 !important;
+            border-color: #334155 !important;
+        }
+
+        .dark input::placeholder,
+        .dark textarea::placeholder {
+            color: #64748B !important;
+        }
+
+        /* Table rows */
+        .dark table {
+            color: #CBD5E1 !important;
+        }
+
+        .dark tr:hover {
+            background-color: #1E293B !important;
+        }
+
+        .dark .divide-slate-50>* {
+            border-color: #334155 !important;
+        }
+
+        .dark .divide-y>* {
+            border-color: #334155 !important;
+        }
+
+        /* Chat bubbles — AI side */
+        .dark .bg-slate-50.rounded-2xl {
+            background-color: #1E293B !important;
+            border-color: #334155 !important;
+        }
+
+        /* Input area in chat */
+        .dark .bg-slate-50.border-t {
+            background-color: #1E293B !important;
+            border-color: #334155 !important;
+        }
+
+        /* Checkbox */
+        .dark .bg-slate-100 {
+            background-color: #334155 !important;
+        }
+
+        .dark .text-slate-700.bg-slate-100 {
+            background-color: #334155 !important;
+        }
+
+        /* Quick stats icon bg */
+        .dark .bg-calm-50 {
+            background-color: #1e3a5f !important;
+        }
+
+        .dark .bg-lav-50 {
+            background-color: #2d1f4a !important;
+        }
+
+        .dark .bg-sage-50 {
+            background-color: #1a3329 !important;
+        }
+
+        .dark .bg-amber-50 {
+            background-color: #292114 !important;
+        }
+
+        /* Smooth transitions */
+        html {
+            transition: background-color 0.3s ease;
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-surface-2 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- ── Disclaimer Banner ──────────────────────────────────────────── -->
+    <div class="bg-rose-50 border-b border-rose-200 py-1.5 px-4 text-center">
+        <p class="text-xs text-rose-600 font-medium">
+            ⚕️ <strong>Not a medical tool.</strong>
+            MindGuard provides early emotional support detection only. Always consult a qualified mental health
+            professional.
+        </p>
+    </div>
+
+    <!-- ── Navigation ────────────────────────────────────────────────── -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+
+            <!-- Brand -->
+            <a href="{{ url_for('auth.index') }}" class="flex items-center gap-2">
+                <div
+                    class="w-8 h-8 bg-gradient-to-br from-calm-500 to-lav-500 rounded-lg flex items-center justify-center">
+                    <i class="bi bi-heart-pulse-fill text-white text-sm"></i>
+                </div>
+                <span class="font-bold text-lg text-slate-800">Mind<span class="text-calm-600">Guard</span></span>
+            </a>
+
+            <!-- Desktop Nav -->
+            {% if session.get('user_id') %}
+            <div class="hidden md:flex items-center gap-1">
+                <a href="{{ url_for('dashboard.index') }}" class="nav-link-neon px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-neon-blue transition-all
+                          {% if request.endpoint == 'dashboard.index' %}text-neon-blue{% endif %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+                <a href="{{ url_for('chat.index') }}" class="nav-link-neon px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-neon-blue transition-all
+                          {% if request.endpoint == 'chat.index' %}text-neon-blue{% endif %}">
+                    <i class="bi bi-chat-heart me-1"></i>Chat Support
+                </a>
+                <a href="{{ url_for('mood.checkin') }}" class="nav-link-neon px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-neon-blue transition-all
+                          {% if request.endpoint == 'mood.checkin' %}text-neon-blue{% endif %}">
+                    <i class="bi bi-clipboard-check me-1"></i>Self Assessment
+                </a>
+                <a href="{{ url_for('personalized.color_test') }}" class="nav-link-neon px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-neon-blue transition-all
+                          {% if 'personalized.' in request.endpoint|default('') %}text-neon-blue{% endif %}">
+                    <i class="bi bi-palette me-1"></i>Mood Check
+                </a>
+                <a href="{{ url_for('mood.wellness') }}" class="nav-link-neon px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-neon-blue transition-all
+                          {% if request.endpoint == 'mood.wellness' %}text-neon-blue{% endif %}">
+                    <i class="bi bi-flower1 me-1"></i>Wellness
+                </a>
+                <a href="{{ url_for('media.index') }}" class="nav-link-neon px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-neon-blue transition-all
+                          {% if 'media.' in request.endpoint|default('') %}text-neon-blue{% endif %}">
+                    <i class="bi bi-play-btn-fill me-1"></i>Media Dashboard
+                </a>
+                <a href="{{ url_for('assessment.dashboard') }}" class="nav-link-neon px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-neon-blue transition-all
+                          {% if 'assessment.' in request.endpoint|default('') %}text-neon-blue{% endif %}">
+                    <i class="bi bi-graph-up-arrow me-1"></i>Mood Analysis
+                </a>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <!-- Theme toggle -->
+                <button id="theme-toggle"
+                    class="w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:text-calm-600 hover:border-calm-300 hover:bg-calm-50 transition-all"
+                    title="Toggle theme">
+                    <i class="bi bi-sun-fill text-sm"></i>
+                </button>
+                <a href="{{ url_for('privacy.index') }}"
+                    class="w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:text-calm-600 hover:border-calm-300 hover:bg-calm-50 transition-all"
+                    title="Privacy">
+                    <i class="bi bi-shield-check text-sm"></i>
+                </a>
+                <a href="{{ url_for('auth.logout') }}"
+                    class="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-600 transition-all">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </a>
+            </div>
+            {% else %}
+            <div class="flex items-center gap-2">
+                <button id="theme-toggle"
+                    class="w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:text-calm-600 transition-all"
+                    title="Toggle theme">
+                    <i class="bi bi-sun-fill text-sm"></i>
+                </button>
+                <a href="{{ url_for('auth.login') }}"
+                    class="px-4 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-calm-600 transition-all">Log
+                    in</a>
+                <a href="{{ url_for('auth.register') }}"
+                    class="px-4 py-2 rounded-lg text-sm font-semibold bg-calm-600 text-white hover:bg-calm-700 transition-all shadow-sm">Get
+                    Started</a>
+            </div>
+            {% endif %}
+
+            <!-- Mobile hamburger -->
+            <button id="mob-menu-btn"
+                class="md:hidden w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-600"
+                onclick="document.getElementById('mob-menu').classList.toggle('hidden')">
+                <i class="bi bi-list text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mob-menu" class="hidden md:hidden px-4 pb-3 border-t border-slate-100">
+            {% if session.get('user_id') %}
+            <div class="flex flex-col gap-1 pt-2">
+                <a href="{{ url_for('dashboard.index') }}"
+                    class="px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-calm-50 hover:text-calm-600">Dashboard</a>
+                <a href="{{ url_for('chat.index') }}"
+                    class="px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-calm-50 hover:text-calm-600">Chat
+                    Support</a>
+                <a href="{{ url_for('mood.checkin') }}"
+                    class="px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-calm-50 hover:text-calm-600">Self
+                    Assessment</a>
+                <a href="{{ url_for('mood.wellness') }}"
+                    class="px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-calm-50 hover:text-calm-600">Wellness
+                    Hub</a>
+                <a href="{{ url_for('media.index') }}"
+                    class="px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-calm-50 hover:text-calm-600">Media
+                    Dashboard</a>
+                <a href="{{ url_for('assessment.dashboard') }}"
+                    class="px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-calm-50 hover:text-calm-600">Mood
+                    & Mental Health Analysis</a>
+                <a href="{{ url_for('auth.logout') }}"
+                    class="px-3 py-2 rounded-lg text-sm text-rose-600 hover:bg-rose-50">Logout</a>
+            </div>
+            {% else %}
+            <div class="flex flex-col gap-1 pt-2">
+                <a href="{{ url_for('auth.login') }}"
+                    class="px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-calm-50">Log in</a>
+                <a href="{{ url_for('auth.register') }}"
+                    class="px-3 py-2 rounded-lg text-sm font-semibold text-calm-600 hover:bg-calm-50">Get Started →</a>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- ── Flash Messages ─────────────────────────────────────────────── -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="max-w-6xl mx-auto px-4 pt-4 w-full">
+        {% for category, message in messages %}
+        <div class="flex items-start gap-3 p-3 rounded-xl border mb-2 animate-fade-in
+            {% if category == 'danger' %}bg-rose-50 border-rose-200 text-rose-700
+            {% elif category == 'success' %}bg-sage-50 border-sage-200 text-sage-700
+            {% elif category == 'warning' %}bg-amber-50 border-amber-200 text-amber-700
+            {% else %}bg-calm-50 border-calm-200 text-calm-700{% endif %}">
+            <i
+                class="bi bi-{% if category=='danger' %}exclamation-circle{% elif category=='success' %}check-circle{% elif category=='warning' %}exclamation-triangle{% else %}info-circle{% endif %} mt-0.5 flex-shrink-0"></i>
+            <span class="text-sm">{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- ── Main Content ───────────────────────────────────────────────── -->
+    <main class="flex-1 max-w-6xl mx-auto px-4 py-6 w-full animate-fade-in">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ── Footer ────────────────────────────────────────────────────── -->
+    <footer class="bg-white border-t border-slate-200 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 py-6 text-center">
+            <div class="flex items-center justify-center gap-2 mb-2">
+                <div
+                    class="w-5 h-5 bg-gradient-to-br from-calm-500 to-lav-500 rounded flex items-center justify-center">
+                    <i class="bi bi-heart-pulse-fill text-white" style="font-size:9px"></i>
+                </div>
+                <span class="font-semibold text-slate-700 text-sm">MindGuard</span>
+            </div>
+            <p class="text-xs text-slate-500 max-w-xl mx-auto">
+                This system is for early risk detection and support only. It is <strong>not a medical diagnosis
+                    tool</strong>.
+                If you are in crisis, please contact
+                <strong>{{ primary_helpline_name }}: {{ primary_helpline_number }}</strong> or
+                <strong>{{ secondary_helpline_name }}: {{ secondary_helpline_number }}</strong>.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Neon Cursor Glow Element -->
+    <div id="cursor-glow"></div>
+
+    <!-- Theme Toggle & Cursor Glow Script -->
+    <script>
+        const btn = document.getElementById('theme-toggle');
+        const glow = document.getElementById('cursor-glow');
+
+        function applyTheme(t) {
+            document.documentElement.classList.toggle('dark', t === 'dark');
+            document.documentElement.setAttribute('data-theme', t);
+            localStorage.setItem('mg-theme', t);
+            if (btn) {
+                btn.querySelector('i').className = t === 'dark' ? 'bi bi-sun-fill text-sm' : 'bi bi-moon-stars-fill text-sm';
+                btn.title = t === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+            }
+            // Update glow color based on theme
+            if (glow) {
+                glow.style.opacity = t === 'dark' ? '1' : '0.4';
+            }
+        }
+        applyTheme(localStorage.getItem('mg-theme') || 'light');
+        if (btn) btn.addEventListener('click', () => applyTheme(localStorage.getItem('mg-theme') === 'dark' ? 'light' : 'dark'));
+
+        // Cursor Glow Logic
+        document.addEventListener('mousemove', (e) => {
+            if (glow) {
+                // Smooth follow
+                requestAnimationFrame(() => {
+                    glow.style.left = e.clientX + 'px';
+                    glow.style.top = e.clientY + 'px';
+                });
+            }
+        });
+
+        // Hover Intensification
+        document.querySelectorAll('a, button, .card-lift').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                if (glow) {
+                    glow.style.width = '600px';
+                    glow.style.height = '600px';
+                    glow.style.background = 'radial-gradient(circle, rgba(0, 242, 255, 0.25) 0%, rgba(188, 19, 254, 0.1) 40%, transparent 70%)';
+                }
+            });
+            el.addEventListener('mouseleave', () => {
+                if (glow) {
+                    glow.style.width = '400px';
+                    glow.style.height = '400px';
+                    glow.style.background = 'radial-gradient(circle, rgba(0, 242, 255, 0.15) 0%, rgba(188, 19, 254, 0.05) 40%, transparent 70%)';
+                }
+            });
+        });
+    </script>
+
+    <!-- Anti-Inspect / Anti-Right-Click Script -->
+    <script>
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', event => {
+            if (event.keyCode == 123) { // F12
+                event.preventDefault();
+                return false;
+            }
+            if (event.ctrlKey && event.shiftKey && event.keyCode == 73) { // Ctrl+Shift+I
+                event.preventDefault();
+                return false;
+            }
+            if (event.ctrlKey && event.shiftKey && event.keyCode == 74) { // Ctrl+Shift+J
+                event.preventDefault();
+                return false;
+            }
+            if (event.ctrlKey && event.keyCode == 85) { // Ctrl+U
+                event.preventDefault();
+                return false;
+            }
+        });
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>

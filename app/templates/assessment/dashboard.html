@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}Mood Analysis Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+
+    <div class="mb-10 animate-fade-in text-center">
+        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
+            Mood & <span class="text-transparent bg-clip-text bg-gradient-to-r from-calm-500 to-lav-600">Mental Health
+                Analysis</span>
+        </h1>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+            Review your emotional trends, track your wellbeing, and discover patterns in your resilience.
+        </p>
+    </div>
+
+    {% if not latest %}
+    <!-- Empty State -->
+    <div
+        class="max-w-2xl mx-auto bg-white rounded-[2.5rem] p-12 text-center border-2 border-dashed border-slate-100 animate-slide-up">
+        <div class="w-24 h-24 bg-calm-50 rounded-full flex items-center justify-center mx-auto mb-8">
+            <i class="bi bi-clipboard-pulse text-4xl text-calm-500"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900 mb-4">No assessments found yet</h2>
+        <p class="text-slate-500 mb-10">Start your first AI-powered mental health assessment to unlock personalized
+            insights and trend tracking.</p>
+        <a href="{{ url_for('assessment.profile') }}"
+            class="inline-flex items-center px-10 py-5 bg-slate-900 text-white font-bold rounded-2xl shadow-xl hover:bg-slate-800 transition-all transform hover:-translate-y-1">
+            Start My Assessment <i class="bi bi-chevron-right ms-2"></i>
+        </a>
+    </div>
+    {% else %}
+
+    <!-- Dashboard Content -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+
+        <!-- Weekly Trend / Summary Sidebar -->
+        <div class="space-y-8">
+            <!-- Summary Card -->
+            <div
+                class="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl shadow-slate-100/50 animate-slide-up">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Latest Snapshot</h3>
+                <div class="flex items-center gap-6 mb-8">
+                    <div class="w-16 h-16 rounded-2xl bg-calm-50 flex items-center justify-center text-3xl">
+                        {% if latest.total_score / latest.max_score >= 0.8 %}😊{% elif latest.total_score /
+                        latest.max_score >= 0.6 %}😐{% else %}😔{% endif %}
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase">Recent Mood</p>
+                        <p class="text-xl font-bold text-slate-800">{{ latest.mood_prediction }}</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-500">Resilience Score</span>
+                        <span class="font-bold text-slate-800">{{ (latest.total_score / latest.max_score *
+                            100)|round|int }}%</span>
+                    </div>
+                    <div class="w-full bg-slate-50 h-2 rounded-full overflow-hidden">
+                        <div class="bg-calm-500 h-full rounded-full"
+                            style="width: {{ (latest.total_score / latest.max_score * 100) }}%"></div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-8 border-t border-slate-50">
+                    <a href="{{ url_for('assessment.start_session') }}"
+                        class="w-full py-4 px-6 bg-slate-50 text-slate-900 font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-calm-50 hover:text-calm-600 transition-all">
+                        Retake Assessment <i class="bi bi-arrow-repeat"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Profile Overview -->
+            <div
+                class="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl shadow-slate-200/50 animate-slide-up delay-100">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Your Profile</h3>
+                <div class="space-y-6">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Age Group</p>
+                        <p class="text-lg font-bold">{{ user.age_group }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Life Stage</p>
+                        <p class="text-lg font-bold">{{ user.life_stage }}</p>
+                    </div>
+                    {% if user.industry %}
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Focus Area</p>
+                        <p class="text-lg font-bold">{{ user.industry }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Trend Charts & History -->
+        <div class="xl:col-span-2 space-y-8 animate-slide-up delay-200">
+            <!-- Mood History List -->
+            <div class="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-100/50">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-xl font-bold text-slate-900">Emotional History</h3>
+                    <div class="flex gap-2">
+                        <span
+                            class="px-3 py-1 bg-slate-50 text-slate-400 rounded-lg text-[10px] font-bold uppercase tracking-wide">Last
+                            10 Sessions</span>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    {% for sess in history %}
+                    <div
+                        class="flex items-center justify-between p-5 rounded-2xl border border-slate-50 hover:border-calm-100 hover:bg-calm-50/20 transition-all">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center shadow-sm">
+                                <i class="bi bi-calendar-event text-slate-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-slate-800">{{ sess.mood_prediction }}</p>
+                                <p class="text-[10px] text-slate-400 font-medium">{{ sess.timestamp.strftime('%B %d,
+                                    %Y') }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-slate-800">{{ sess.total_score }} / {{ sess.max_score }}
+                            </p>
+                            <p class="text-[10px] text-calm-500 font-bold uppercase">{{ (sess.total_score /
+                                sess.max_score * 100)|round|int }}% resilience</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Visualization Placeholder (Simple CSS charts) -->
+            <div
+                class="bg-gradient-to-br from-calm-600 to-lav-700 rounded-[2.5rem] p-10 text-white shadow-xl shadow-calm-200/50 relative overflow-hidden">
+                <div class="relative z-10">
+                    <h3 class="text-xl font-bold mb-2">Resilience Trend</h3>
+                    <p class="text-calm-100 text-sm mb-10">Tracking your emotional health score over your last sessions.
+                    </p>
+
+                    <!-- Line chart placeholder with CSS -->
+                    <div class="h-40 flex items-end justify-between gap-4 px-4 border-b border-white/20 pb-4">
+                        {% for sess in history[::-1] %}
+                        <div class="relative flex-1 bg-white/20 rounded-t-lg group transition-all hover:bg-white/40"
+                            style="height: {{ (sess.total_score / sess.max_score * 100) }}%">
+                            <div
+                                class="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-slate-900 text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                {{ (sess.total_score / sess.max_score * 100)|round|int }}%
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div
+                        class="flex justify-between mt-4 text-[10px] font-bold text-calm-200 uppercase tracking-widest px-2">
+                        <span>Older</span>
+                        <span>Latest</span>
+                    </div>
+                </div>
+
+                <!-- Decorative background shapes -->
+                <div
+                    class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl">
+                </div>
+                <div
+                    class="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-48 h-48 bg-lav-400/20 rounded-full blur-2xl">
+                </div>
+            </div>
+        </div>
+
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

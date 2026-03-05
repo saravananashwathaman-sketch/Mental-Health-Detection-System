@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}Media Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <div class="mb-10 animate-fade-in">
+        <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">
+            Media <span
+                class="bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(0,242,255,0.4)]">Dashboard</span>
+        </h1>
+        <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl">
+            Curated content tailored to your personality and mood.
+            Discover music, memes, and professional templates.
+        </p>
+    </div>
+
+    <!-- Category Filters -->
+    <div class="flex flex-wrap gap-3 mb-12 animate-slide-up">
+        <a href="{{ url_for('media.index') }}"
+            class="px-5 py-2.5 rounded-2xl font-bold transition-all shadow-sm
+                  {% if not active_cat %} bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-neon-blue {% else %} bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:border-neon-blue border border-slate-100 dark:border-slate-800 {% endif %}">
+            All Content
+        </a>
+        {% for cat in categories %}
+        <a href="{{ url_for('media.category_view', category=cat) }}"
+            class="px-5 py-2.5 rounded-2xl font-bold bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800 hover:border-neon-purple hover:text-neon-purple transition-all shadow-sm">
+            {{ cat }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Preview Sections by Personality -->
+    {% for cat, items in sections.items() %}
+    {% if items %}
+    <section class="mb-16">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
+                <span class="w-2 h-8 bg-neon-blue rounded-full shadow-[0_0_8px_rgba(0,242,255,0.6)]"></span>
+                {{ cat }}
+            </h2>
+            <a href="{{ url_for('media.category_view', category=cat) }}"
+                class="text-neon-blue font-bold hover:text-blue-400 text-sm flex items-center gap-1 transition-colors">
+                View All <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for item in items %}
+            <div
+                class="group bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm hover:border-neon-blue transition-all duration-300 hover:-translate-y-1">
+                <!-- Thumbnail / Type Badge -->
+                <div class="relative aspect-video bg-slate-100">
+                    {% if item.thumbnail_url %}
+                    <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}"
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    {% else %}
+                    <div
+                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+                        <i
+                            class="bi {% if item.type == 'song' %}bi-music-note-beamed{% elif item.type == 'video' %}bi-play-circle-fill{% elif item.type == 'meme' %}bi-emoji-laughing-fill{% else %}bi-image-fill{% endif %} text-slate-300 text-4xl"></i>
+                    </div>
+                    {% endif %}
+
+                    <div class="absolute top-3 left-3">
+                        <span
+                            class="px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-sm text-[10px] font-bold uppercase tracking-wider text-slate-700 shadow-sm">
+                            {{ item.type }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-5">
+                    <h3
+                        class="font-bold text-slate-800 dark:text-white mb-2 line-clamp-1 group-hover:text-neon-blue transition-colors">
+                        {{ item.title }}</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4">{{
+                        item.description }}</p>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex gap-1">
+                            {% for tag in item.tags.split(',')[:2] %}
+                            <span
+                                class="text-[9px] px-2 py-0.5 rounded-md bg-slate-50 text-slate-500 border border-slate-100">#{{
+                                tag.strip() }}</span>
+                            {% endfor %}
+                        </div>
+                        <a href="{{ item.source_url }}" target="_blank"
+                            class="w-8 h-8 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-calm-50 hover:text-calm-600 transition-all border border-slate-100">
+                            <i class="bi bi-box-arrow-up-right text-sm"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Main Live Feed -->
+    <section class="mt-20">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-3">Trending Now</h2>
+            <div
+                class="h-1.5 w-20 bg-gradient-to-r from-neon-blue to-neon-purple rounded-full mx-auto shadow-[0_0_10px_rgba(0,242,255,0.4)]">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {% for item in all_content %}
+            <div
+                class="bg-white rounded-[2rem] p-4 border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
+                <div class="relative rounded-2xl overflow-hidden aspect-square mb-5">
+                    {% if item.thumbnail_url %}
+                    <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}" class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-full bg-slate-50 flex items-center justify-center">
+                        <i class="bi bi-collection-play text-slate-200 text-6xl"></i>
+                    </div>
+                    {% endif %}
+
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+                        <a href="{{ item.source_url }}" target="_blank"
+                            class="w-full py-3 bg-white text-slate-900 font-bold rounded-xl text-center shadow-lg hover:bg-slate-50 transition-colors">
+                            Open Content
+                        </a>
+                    </div>
+                </div>
+
+                <div class="px-2">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span
+                            class="text-[10px] font-bold text-calm-600 bg-calm-50 px-2 py-0.5 rounded-lg uppercase tracking-wide">{{
+                            item.personality_category }}</span>
+                        <span class="text-[10px] font-bold text-slate-400">• {{ item.language }}</span>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-800 mb-2 line-clamp-1">{{ item.title }}</h4>
+                    <p class="text-sm text-slate-500 line-clamp-2 leading-snug">{{ item.description }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
+
+<style>
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slide-up {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fade-in 0.8s ease-out forwards;
+    }
+
+    .animate-slide-up {
+        animation: slide-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+</style>
+{% endblock %}

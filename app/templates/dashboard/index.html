@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">
+            Hi, <span class="text-neon-blue drop-shadow-[0_0_8px_rgba(0,242,255,0.5)]">{{ session.get('user_email',
+                '').split('@')[0] | capitalize }}</span> 👋
+        </h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Here's your mental wellbeing overview</p>
+    </div>
+    <div class="flex items-center gap-3">
+        <a href="{{ url_for('personalized.color_test') }}"
+            class="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-slate-700 bg-white border border-slate-200 shadow-sm hover:border-neon-blue hover:text-neon-blue transition-all text-sm dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300">
+            <i class="bi bi-lightning-charge"></i> Quick Mood Test
+        </a>
+        <a href="{{ url_for('chat.voice') }}"
+            class="neon-btn flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white bg-gradient-to-r from-slate-700 to-slate-900 shadow-neon-blue hover:from-slate-800 hover:to-black transition-all text-sm group">
+            <span class="relative flex h-2 w-2 mr-1">
+                <span
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-blue opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-neon-blue"></span>
+            </span>
+            <i class="bi bi-mic-fill group-hover:animate-pulse"></i> Voice Assistant
+        </a>
+        <a href="{{ url_for('mood.checkin') }}"
+            class="neon-btn flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-white bg-gradient-to-r from-neon-blue to-blue-600 shadow-neon-blue hover:from-blue-500 hover:to-blue-700 transition-all text-sm">
+            <i class="bi bi-plus-circle"></i> New Check-In
+        </a>
+    </div>
+</div>
+
+<!-- KPI Row -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+
+    <!-- Wellbeing Score -->
+    <div
+        class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 text-center card-lift hover:border-neon-purple transition-all duration-300">
+        {% if latest_score %}
+        {% set score = latest_score.wellbeing_score %}
+        {% set risk = latest_score.risk_level %}
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Wellbeing Score</p>
+        <div class="relative w-28 h-28 mx-auto mb-4">
+            <!-- SVG ring -->
+            <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="16" fill="none" stroke="#F1F5F9" stroke-width="3" />
+                <circle cx="18" cy="18" r="16" fill="none"
+                    stroke="{% if risk=='RED' %}#F43F5E{% elif risk=='AMBER' %}#F59E0B{% else %}#22C55E{% endif %}"
+                    stroke-width="3" stroke-dasharray="{{ score }}, 100" stroke-linecap="round" />
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span
+                    class="text-3xl font-extrabold {% if risk=='RED' %}text-rose-500{% elif risk=='AMBER' %}text-amber-500{% else %}text-sage-500{% endif %}">{{
+                    score|int }}</span>
+                <span class="text-xs text-slate-400">/100</span>
+            </div>
+        </div>
+        <span
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
+            {% if risk=='GREEN' %}bg-sage-100 text-sage-700{% elif risk=='AMBER' %}bg-amber-100 text-amber-700{% else %}bg-rose-100 text-rose-700{% endif %}">
+            <span
+                class="w-1.5 h-1.5 rounded-full {% if risk=='GREEN' %}bg-sage-500{% elif risk=='AMBER' %}bg-amber-500{% else %}bg-rose-500 animate-pulse{% endif %}"></span>
+            <span class="uppercase tracking-wide">{{ latest_score.category }}</span>
+        </span>
+        <p class="text-xs text-slate-400 mt-2">{{ latest_score.timestamp.strftime('%b %d, %H:%M') }}</p>
+        {% else %}
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Wellbeing Score</p>
+        <div class="relative w-28 h-28 mx-auto mb-4">
+            <!-- SVG ring -->
+            <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="16" fill="none" stroke="#F1F5F9" stroke-width="3" />
+                <circle cx="18" cy="18" r="16" fill="none" stroke="#94A3B8" stroke-width="3" stroke-dasharray="0, 100"
+                    stroke-linecap="round" />
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-3xl font-extrabold text-slate-400">0</span>
+                <span class="text-xs text-slate-400">/100</span>
+            </div>
+        </div>
+        <span
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+            No Data
+        </span>
+        <a href="{{ url_for('mood.checkin') }}"
+            class="block text-xs font-semibold text-calm-600 hover:text-calm-700 mt-4">Start
+            first check-in →</a>
+        {% endif %}
+    </div>
+
+    <!-- Trend Chart -->
+    <div
+        class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 card-lift hover:border-neon-blue transition-all duration-300">
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Wellbeing Trend (14 days)</p>
+        <div class="relative w-full h-32">
+            <canvas id="wellbeingChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div
+        class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 card-lift hover:border-neon-green transition-all duration-300">
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Quick Stats</p>
+        <div class="space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-calm-50 flex items-center justify-center">
+                    <i class="bi bi-journal-check text-calm-600"></i>
+                </div>
+                <div>
+                    <div class="font-bold text-slate-800">{{ recent_moods|length }}</div>
+                    <div class="text-xs text-slate-500">Check-ins logged</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-xl bg-neon-purple/10 flex items-center justify-center border border-neon-purple/20">
+                    <i class="bi bi-chat-heart text-neon-purple"></i>
+                </div>
+                <div>
+                    <div class="font-bold text-slate-800 dark:text-white">{{ chat_count }}</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">Chat messages (7d)</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-sage-50 flex items-center justify-center">
+                    <i class="bi bi-flower1 text-sage-600"></i>
+                </div>
+                <div>
+                    <a href="{{ url_for('mood.wellness') }}"
+                        class="text-sm font-semibold text-sage-600 hover:text-sage-700">
+                        Wellness Hub →
+                    </a>
+                    <div class="text-xs text-slate-500">Exercises & resources</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
+                    <i class="bi bi-file-earmark-bar-graph text-orange-600"></i>
+                </div>
+                <div>
+                    <a href="{{ url_for('personalized.report_view') }}"
+                        class="text-sm font-semibold text-orange-600 hover:text-orange-700">
+                        Latest Report →
+                    </a>
+                    <div class="text-xs text-slate-500">Comprehensive AI Analysis</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Risk Alert -->
+{% if latest_score and latest_score.risk_level == 'RED' %}
+<div class="flex items-start gap-3 bg-rose-50 border border-rose-200 rounded-2xl p-4 mb-5">
+    <i class="bi bi-exclamation-triangle-fill text-rose-500 text-xl flex-shrink-0 mt-0.5"></i>
+    <div>
+        <p class="font-semibold text-rose-700 text-sm">High Risk Detected</p>
+        <p class="text-xs text-rose-600 mt-0.5">
+            Your wellbeing score suggests you may be struggling. Please visit the
+            <a href="{{ url_for('mood.wellness') }}" class="underline font-medium">Wellness Hub</a> or
+            call <strong>{{ primary_helpline_name }}: {{ primary_helpline_number }}</strong>.
+        </p>
+    </div>
+</div>
+{% elif latest_score and latest_score.risk_level == 'AMBER' %}
+<div class="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5">
+    <i class="bi bi-exclamation-circle-fill text-amber-500 text-xl flex-shrink-0 mt-0.5"></i>
+    <div>
+        <p class="font-semibold text-amber-700 text-sm">Moderate Concern</p>
+        <p class="text-xs text-amber-600 mt-0.5">
+            Things seem a bit challenging. Consider
+            <a href="{{ url_for('mood.wellness') }}" class="underline">wellness tools</a> or
+            <a href="{{ url_for('chat.index') }}" class="underline">chatting with our AI companion</a>.
+        </p>
+    </div>
+</div>
+{% endif %}
+
+<!-- Bottom Row -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+    <!-- Recent Check-ins -->
+    <div class="md:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-5 card-lift">
+        <h2 class="font-semibold text-slate-700 text-sm mb-4 flex items-center gap-2">
+            <i class="bi bi-clock-history text-calm-500"></i> Recent Check-Ins
+        </h2>
+        {% if recent_moods %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-xs text-slate-400 border-b border-slate-100">
+                        <th class="text-left pb-2 font-medium">Date</th>
+                        <th class="text-left pb-2 font-medium">Mood</th>
+                        <th class="text-left pb-2 font-medium">Sleep</th>
+                        <th class="text-left pb-2 font-medium">Activity</th>
+                        <th class="text-left pb-2 font-medium">Notes</th>
+                        <th class="text-right pb-2 font-medium">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% for m in recent_moods %}
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="py-2 text-xs text-slate-400">{{ m.timestamp.strftime('%b %d') }}</td>
+                        <td class="py-2">
+                            {% set emojis = ['', '😔', '😞', '😐', '🙂', '😊'] %}
+                            {{ emojis[m.mood_score] }} <span class="text-xs text-slate-600">{{ m.mood_score }}/5</span>
+                        </td>
+                        <td class="py-2 text-xs text-slate-600">{{ m.sleep_hours }}h</td>
+                        <td class="py-2 text-xs text-slate-600">
+                            {% if m.activity_level == 1 %}🪑 Low{% elif m.activity_level == 2 %}🚶 Moderate{% else %}🏃
+                            Active{% endif %}
+                        </td>
+                        <td class="py-2 text-xs text-slate-400">{{ (m.notes or '')[:35] }}{{ '…' if m.notes and
+                            m.notes|length > 35 }}</td>
+                        <td class="py-2 text-right">
+                            <div class="flex justify-end gap-2">
+                                <a href="{{ url_for('mood.edit', entry_id=m.id) }}"
+                                    class="text-slate-400 hover:text-calm-600 transition-colors" title="Edit">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <form action="{{ url_for('mood.delete', entry_id=m.id) }}" method="POST" class="inline"
+                                    onsubmit="return confirm('Are you sure you want to delete this check-in?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="text-slate-400 hover:text-rose-500 transition-colors"
+                                        title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-10">
+            <i class="bi bi-journal-x text-slate-200 text-4xl block mb-2"></i>
+            <p class="text-sm text-slate-400 mb-3">No check-ins yet</p>
+            <a href="{{ url_for('mood.checkin') }}" class="text-xs font-semibold text-calm-600">Start your first one!
+                →</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Self-Care + Mood Dist -->
+    <div class="space-y-4">
+        <!-- Today's Self-Care -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 card-lift">
+            <h2 class="font-semibold text-slate-700 text-sm mb-3 flex items-center gap-2">
+                <i class="bi bi-check2-all text-sage-500"></i> Today's Self-Care
+            </h2>
+            <div class="space-y-2">
+                {% for item in ['Drank 8 glasses of water','Ate a nutritious meal','Got some fresh air','Talked to
+                someone','Took a screen break','Did something enjoyable'] %}
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" class="rounded border-slate-300 text-calm-600 focus:ring-calm-500"
+                        id="care{{ loop.index }}">
+                    <span class="text-xs text-slate-600 group-hover:text-slate-800 transition-colors">{{ item }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Landscape Mood Distribution (Full Width) -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 card-lift mt-4">
+        <h2 class="font-semibold text-slate-700 text-sm mb-3 flex items-center gap-2">
+            <i class="bi bi-bar-chart-fill text-lav-500"></i> Mood Distribution
+        </h2>
+        <div class="w-full">
+            <canvas id="moodDistChart" height="240"></canvas>
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block extra_scripts %}
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    {% endblock %}

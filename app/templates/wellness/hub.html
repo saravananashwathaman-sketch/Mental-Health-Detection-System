@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% block title %}Wellness Hub{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+        <i class="bi bi-flower1 text-neon-green drop-shadow-[0_0_8px_rgba(57,255,20,0.5)]"></i> Wellness Hub
+    </h1>
+    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Evidence-based techniques to support your mental
+        wellbeing.</p>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+    <!-- ── 4-7-8 Breathing ─────────────────────────────────────────────── -->
+    <div
+        class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm card-lift flex flex-col hover:border-neon-blue transition-all duration-300">
+        <div class="p-6 text-center flex flex-col items-center flex-1">
+            <i class="bi bi-wind text-4xl text-neon-blue mb-3 drop-shadow-[0_0_10px_rgba(0,242,255,0.4)]"></i>
+            <h5 class="font-bold text-slate-800 dark:text-white mb-2">4-7-8 Breathing</h5>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mb-4 leading-relaxed">
+                Calm your nervous system in minutes. Inhale for 4 s, hold for 7 s, exhale for 8 s.
+            </p>
+            <div id="breathing-display"
+                class="w-24 h-24 rounded-full border-4 border-slate-300 dark:border-slate-700 flex items-center justify-center mx-auto mb-4 cursor-pointer transition-all duration-700"
+                style="box-shadow: 0 0 0 rgba(0,212,200,0);">
+                <span id="breathing-text" class="text-xs font-bold text-slate-600 dark:text-slate-400">Tap to
+                    Start</span>
+            </div>
+            <button onclick="startBreathing()"
+                class="neon-btn px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-neon-blue to-blue-600 text-white shadow-neon-blue border-none">
+                <i class="bi bi-play-circle me-1"></i> Start Exercise
+            </button>
+        </div>
+    </div>
+
+    <!-- ── 5-4-3-2-1 Grounding ──────────────────────────────────────────── -->
+    <div
+        class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm card-lift flex flex-col hover:border-neon-green transition-all duration-300">
+        <div class="p-6 flex flex-col flex-1">
+            <div class="text-center mb-3">
+                <i
+                    class="bi bi-hand-index text-4xl text-neon-green mb-3 block drop-shadow-[0_0_10px_rgba(57,255,20,0.4)]"></i>
+                <h5 class="font-bold text-slate-800 dark:text-white mb-1">5-4-3-2-1 Grounding</h5>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Anchor yourself to the present moment during
+                    anxiety.</p>
+            </div>
+            <ul class="space-y-2 mt-3">
+                {% for num, colour, sense, desc in [
+                (5,'bg-neon-green','See','Name 5 things you can see right now.'),
+                (4,'bg-neon-green','Touch','Notice 4 things you can physically feel.'),
+                (3,'bg-neon-green','Hear','Listen for 3 different sounds.'),
+                (2,'bg-neon-green','Smell','Find 2 things you can smell (or like to smell).'),
+                (1,'bg-neon-green','Taste','Notice 1 thing you can taste.')
+                ] %}
+                <li class="flex items-start gap-2">
+                    <span
+                        class="inline-flex items-center justify-center w-6 h-6 rounded-md {{ colour }} text-blue-900 text-[10px] font-bold flex-shrink-0 mt-0.5 shadow-[0_0_8px_rgba(57,255,20,0.5)]">{{
+                        num }}</span>
+                    <span class="text-sm text-slate-600 dark:text-slate-300"><strong>{{ sense }}</strong> — {{ desc
+                        }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- ── Daily Affirmation ──────────────────────────────────────────────── -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm card-lift flex flex-col">
+        <div class="p-6 text-center flex flex-col items-center flex-1">
+            <i class="bi bi-stars text-4xl text-amber-400 mb-3"></i>
+            <h5 class="font-bold text-slate-800 mb-3">Daily Affirmation</h5>
+            <div id="affirmation-box"
+                class="bg-slate-50 border border-slate-100 rounded-xl p-4 italic text-slate-700 text-sm leading-relaxed min-h-[70px] flex items-center justify-center mb-4 transition-all w-full">
+                "You are stronger than you think, braver than you feel."
+            </div>
+            <button onclick="nextAffirmation()"
+                class="px-4 py-2 rounded-xl text-sm font-semibold border border-amber-300 text-amber-600 hover:bg-amber-50 transition-all">
+                <i class="bi bi-shuffle me-1"></i> New Affirmation
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Crisis Helplines ───────────────────────────────────────────────── -->
+    <div class="bg-rose-50 border border-rose-200 rounded-2xl card-lift flex flex-col">
+        <div class="p-6 flex flex-col flex-1">
+            <h5 class="font-bold text-rose-700 mb-1 flex items-center gap-2">
+                <i class="bi bi-telephone-fill"></i> Crisis Helplines
+            </h5>
+            <p class="text-rose-600 text-xs mb-4">If you're in immediate distress, please reach out:</p>
+            <ul class="space-y-3">
+                {% for h in helplines %}
+                <li>
+                    <span class="font-semibold text-rose-700 text-sm">{{ h.emoji }} {{ h.name }}</span>
+                    {% if h.hours %}<span class="text-xs text-rose-500 block">{{ h.hours }}</span>{% endif %}
+                    {% if h.number %}
+                    <a href="tel:{{ h.number }}" class="text-rose-600 text-sm hover:underline block">📞 {{ h.display
+                        }}</a>
+                    {% endif %}
+                    {% if h.url %}
+                    <a href="{{ h.url }}" target="_blank" class="text-rose-500 text-xs hover:underline block">🌐 {{
+                        h.url | replace('https://','') }}</a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- ── Journaling Prompt ──────────────────────────────────────────────── -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm card-lift flex flex-col">
+        <div class="p-6 text-center flex flex-col items-center flex-1">
+            <i class="bi bi-journal-text text-4xl text-calm-500 mb-3 block"></i>
+            <h5 class="font-bold text-slate-800 mb-3">Journaling Prompt</h5>
+            <div id="journal-prompt"
+                class="bg-slate-50 border border-slate-100 rounded-xl p-4 italic text-slate-700 text-sm leading-relaxed min-h-[70px] flex items-center justify-center mb-4 transition-all w-full">
+                "What is one small thing that brought you comfort today?"
+            </div>
+            <div class="flex gap-2">
+                <button onclick="nextPrompt()"
+                    class="px-3 py-2 rounded-xl text-sm font-semibold border border-calm-300 text-calm-600 hover:bg-calm-50 transition-all">
+                    <i class="bi bi-arrow-clockwise me-1"></i> New Prompt
+                </button>
+                <a href="{{ url_for('chat.index') }}"
+                    class="px-3 py-2 rounded-xl text-sm font-semibold bg-calm-600 text-white hover:bg-calm-700 transition-all">
+                    <i class="bi bi-chat-text me-1"></i> Share with AI
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Quick links card ───────────────────────────────────────────────── -->
+    <div class="bg-slate-50 border border-slate-100 rounded-2xl card-lift flex flex-col">
+        <div class="p-6 flex flex-col flex-1">
+            <h5 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="bi bi-compass text-lav-500"></i> More Resources
+            </h5>
+            <div class="space-y-3">
+                <a href="{{ url_for('mood.checkin') }}"
+                    class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-100 hover:border-calm-300 hover:shadow-sm transition-all group">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-calm-100 flex items-center justify-center group-hover:bg-calm-200 transition-all">
+                        <i class="bi bi-clipboard-check text-calm-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-slate-700">Daily Check-In</div>
+                        <div class="text-xs text-slate-500">Track your mood & sleep</div>
+                    </div>
+                    <i class="bi bi-chevron-right text-slate-400 ml-auto text-xs"></i>
+                </a>
+                <a href="{{ url_for('chat.index') }}"
+                    class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-100 hover:border-lav-300 hover:shadow-sm transition-all group">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-lav-100 flex items-center justify-center group-hover:bg-lav-200 transition-all">
+                        <i class="bi bi-chat-heart text-lav-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-slate-700">AI Chat Support</div>
+                        <div class="text-xs text-slate-500">Talk to our AI companion</div>
+                    </div>
+                    <i class="bi bi-chevron-right text-slate-400 ml-auto text-xs"></i>
+                </a>
+                <a href="{{ url_for('dashboard.index') }}"
+                    class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-100 hover:border-sage-300 hover:shadow-sm transition-all group">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-sage-100 flex items-center justify-center group-hover:bg-sage-200 transition-all">
+                        <i class="bi bi-speedometer2 text-sage-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-slate-700">My Dashboard</div>
+                        <div class="text-xs text-slate-500">View your wellbeing scores</div>
+                    </div>
+                    <i class="bi bi-chevron-right text-slate-400 ml-auto text-xs"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ── Breathing exercise ──────────────────────────────────────────────────
+    const breathingSteps = [
+        { text: "Inhale…", color: "#00f2ff", shadow: "0 0 30px rgba(0,242,255,0.6)", duration: 4000 },
+        { text: "Hold…", color: "#bc13fe", shadow: "0 0 30px rgba(188,19,254,0.6)", duration: 7000 },
+        { text: "Exhale…", color: "#39ff14", shadow: "0 0 30px rgba(57,255,20,0.6)", duration: 8000 },
+    ];
+    let bIndex = 0, bTimer = null;
+
+    function startBreathing() {
+        if (bTimer) clearTimeout(bTimer);
+        runStep();
+    }
+
+    function runStep() {
+        const step = breathingSteps[bIndex % breathingSteps.length];
+        const el = document.getElementById("breathing-display");
+        const txt = document.getElementById("breathing-text");
+        el.style.borderColor = step.color;
+        el.style.boxShadow = step.shadow;
+        txt.textContent = step.text;
+        txt.style.color = step.color;
+        bIndex++;
+        bTimer = setTimeout(runStep, step.duration);
+    }
+
+    // ── Affirmations ────────────────────────────────────────────────────────
+    const affirmations = [
+        '"You are stronger than you think, braver than you feel."',
+        '"Every day is a new beginning."',
+        '"It is okay to not be okay. What matters is reaching out."',
+        '"Your feelings are valid. You deserve support."',
+        '"Progress, not perfection — every small step counts."',
+        '"You are not alone in this journey."',
+        '"Healing is not linear. Be patient with yourself."',
+    ];
+    let aIdx = 0;
+    function nextAffirmation() {
+        aIdx = (aIdx + 1) % affirmations.length;
+        const box = document.getElementById("affirmation-box");
+        box.style.opacity = "0";
+        setTimeout(() => {
+            box.textContent = affirmations[aIdx];
+            box.style.opacity = "1";
+        }, 200);
+    }
+
+    // ── Journaling prompts ──────────────────────────────────────────────────
+    const prompts = [
+        '"What is one small thing that brought you comfort today?"',
+        '"Describe a moment this week when you felt proud of yourself."',
+        '"What are three things you are grateful for right now?"',
+        '"What would you say to a friend going through what you\'re feeling?"',
+        '"What is one thing you can let go of today?"',
+        '"What does a perfect rest day look like for you?"',
+    ];
+    let pIdx = 0;
+    function nextPrompt() {
+        pIdx = (pIdx + 1) % prompts.length;
+        const box = document.getElementById("journal-prompt");
+        box.style.opacity = "0";
+        setTimeout(() => {
+            box.textContent = prompts[pIdx];
+            box.style.opacity = "1";
+        }, 200);
+    }
+</script>
+{% endblock %}

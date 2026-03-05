@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Mood Check-In{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+
+    <div class="text-center mb-8">
+        <div
+            class="w-14 h-14 bg-gradient-to-br from-neon-blue to-neon-purple rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_15px_rgba(0,242,255,0.4)]">
+            <i class="bi bi-emoji-smile text-white text-xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Daily Check-In</h1>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">How are you feeling today? This helps us understand
+            your wellbeing.</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+        <form method="POST" action="{{ url_for('mood.checkin') }}" class="space-y-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <!-- Mood Picker -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+                    <i class="bi bi-emoji-smile-fill text-neon-blue me-1"></i> How's your mood?
+                </label>
+                <div class="flex gap-2 justify-between">
+                    {% for value, emoji, label in [(1,'😔','Very
+                    Low'),(2,'😞','Low'),(3,'😐','Neutral'),(4,'🙂','Good'),(5,'😊','Great')] %}
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="mood_score" value="{{ value }}" class="sr-only peer" required>
+                        <div
+                            class="flex flex-col items-center p-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-800 peer-checked:border-neon-blue peer-checked:bg-neon-blue/10 hover:border-neon-blue/50 transition-all shadow-sm peer-checked:shadow-neon-blue/20">
+                            <span class="text-2xl mb-1">{{ emoji }}</span>
+                            <span
+                                class="text-[10px] text-slate-500 peer-checked:text-neon-blue font-bold tracking-tight">{{
+                                label
+                                }}</span>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Sleep Hours -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    <i class="bi bi-moon-stars-fill text-neon-purple me-1"></i> Sleep last night
+                    <span id="sleep-val" class="text-neon-purple font-bold ml-1">7h</span>
+                </label>
+                <input type="range" name="sleep_hours" id="sleep-slider" min="1" max="12" value="7" step="0.5"
+                    class="w-full h-2 rounded-lg appearance-none cursor-pointer accent-neon-purple bg-slate-200 dark:bg-slate-800"
+                    oninput="document.getElementById('sleep-val').textContent = this.value + 'h'">
+                <div class="flex justify-between text-xs text-slate-400 mt-1">
+                    <span>1h</span><span>12h</span>
+                </div>
+            </div>
+
+            <!-- Activity Level -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+                    <i class="bi bi-lightning-fill text-neon-green me-1"></i> Activity level today
+                </label>
+                <div class="grid grid-cols-3 gap-3">
+                    {% for value, icon, label, desc in [(1,'🪑','Low','Mostly resting'),(2,'🚶','Moderate','Light
+                    movement'),(3,'🏃','Active','Exercise / sport')] %}
+                    <label class="cursor-pointer">
+                        <input type="radio" name="activity_level" value="{{ value }}" class="sr-only peer" required>
+                        <div
+                            class="flex flex-col items-center p-3 rounded-xl border-2 border-slate-200 dark:border-slate-800 peer-checked:border-neon-green peer-checked:bg-neon-green/10 hover:border-neon-green/50 transition-all text-center peer-checked:shadow-neon-green/20">
+                            <span class="text-xl mb-1">{{ icon }}</span>
+                            <span
+                                class="text-xs font-bold text-slate-700 dark:text-slate-200 peer-checked:text-neon-green">{{
+                                label }}</span>
+                            <span class="text-[10px] text-slate-400 leading-tight mt-1">{{ desc }}</span>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div>
+                <label for="notes" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <i class="bi bi-journal-text text-neon-blue me-1"></i> Any notes? <span
+                        class="text-slate-400 font-normal">(optional)</span>
+                </label>
+                <textarea name="notes" id="notes" rows="3"
+                    placeholder="What's been on your mind today? Anything you'd like to note…"
+                    class="w-full rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 px-3 py-2.5 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-neon-blue focus:border-neon-blue resize-none transition shadow-sm"></textarea>
+            </div>
+
+            <button type="submit"
+                class="neon-btn w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-neon-blue to-neon-purple shadow-neon-blue border-none transition-all scale-100 hover:scale-[1.02]">
+                <i class="bi bi-check-circle me-1"></i> Submit Check-In
+            </button>
+        </form>
+    </div>
+
+    <p class="text-center text-xs text-slate-400 mt-4">
+        Your check-in data is private and used only for your personal wellbeing score.
+    </p>
+</div>
+{% endblock %}
